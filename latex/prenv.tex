@@ -1,0 +1,22 @@
+% envelope.tex
+\documentclass{letter}
+\usepackage[margin=0.15in,papersize={4.125in,9.5in},landscape,twoside=false]{geometry}
+\usepackage[pdftex]{graphicx}
+\usepackage{graphicx}
+\usepackage{url}
+\setlength\parskip{0pt}
+\pagestyle{empty}
+ 
+\begin{document}
+ 
+\input{from.tex}
+
+\vspace{0.7in}\large
+\setlength\parindent{3.6in}
+ 
+\begin{center} 
+    \Large{\input{to.tex}}
+\end{center} 
+ 
+\end{document}
+

@@ -1,0 +1,3 @@
+prenv.pdf: prenv.tex
+	pdflatex prenv.tex
+	pdflatex prenv.tex

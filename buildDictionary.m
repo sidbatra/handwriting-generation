@@ -1,0 +1,98 @@
+
+% Returns DICT, so that 
+%   dict{character}{idx}.img has an image of the character.
+%      Here, character is 'A'-'Z' or '0'-'9'.
+%      idx is 1-5.
+%   Also has a dict{character}{idx}.firstRow, but this was a poorly thought
+%   out feature that probably shouldn't be used.
+%
+% Also returns NEXTTOUSE, so that
+%    nextToUse{character} is a random number from 1 to 5 (inclusive)
+
+function [dict, nextToUse] = buildDictionary()
+
+
+%filename = 'IMG_1845_Flat.JPG';
+filename = 'caps.png';
+%filename = 'lower.png';
+
+a = imread(filename);
+%a = imresize(a, 0.33);
+
+b = rgb2gray(a);
+xcoord = round(1:size(a,1)/15:size(a,1));
+ycoord = round(1:size(a,2)/12:size(a,2));
+xcoord = xcoord(2:length(xcoord));
+ycoord = ycoord(2:length(ycoord));
+
+for i=-15:15,
+  b(xcoord+i,:) = 0;
+  b(:,ycoord+i,:) = 0;
+end;
+
+%imshow(b);
+
+%return;
+
+b = rgb2gray(a);
+
+for i=1:12, for j=1:15, 
+  [xc, yc] = characterIndices(i,j,b, 0, 0);
+  thisCharacter = b(xc,yc);
+  thisCharacter = 255-thisCharacter; 
+  %thisCharacter = (thisCharacter - min(min(thisCharacter))) * 2;
+    
+  temp = sort( reshape(thisCharacter,size(thisCharacter,1) * size(thisCharacter,2),1) );
+  thisCharacter = (thisCharacter -   median( temp(1: floor(size(temp,1) * 0.1) ) ) ) * 2.2;
+  thisCharacter = 255-thisCharacter; 
+  
+  b(xc, yc) = thisCharacter;
+end; end;
+
+%clf;imshow(b)
+
+%return
+
+%RED%b2 = arrayfun(@extractCharacter,b); imshow(b2)
+b2 = b; b2(b>=215) = 255; 
+%imshow(b2)
+%clf; imshow(b2); hold on; 
+
+%return;
+
+dict = []; 
+
+for characterIdx=1:26+10, 
+  % Map to ASCII value 
+  if (characterIdx <= 26), 
+    character = characterIdx - 1 + 'A';
+  else
+    character = (characterIdx-26) - 1 + '0';
+  end; 
+
+  for repIdx=1:5, 
+    i = mod(characterIdx-1, 12)+1;
+    j = floor((characterIdx-1)/12)+1 + (repIdx-1)*3; 
+
+    [xc, yc] = characterIndices(i,j,b2, 0, 0);
+    thisCharacter = b2(xc,yc);
+    [nonZeroRows, nonZeroCols] = find(thisCharacter ~= 255);
+    nonZeroRows = [min(nonZeroRows) max(nonZeroRows)] + xc(1) - 1;
+    nonZeroCols = [min(nonZeroCols) max(nonZeroCols)] + yc(1) - 1;
+    %plot([nonZeroCols(1) nonZeroCols(1)], [nonZeroRows(1) nonZeroRows(2)], 'r-');
+    %plot([nonZeroCols(2) nonZeroCols(2)], [nonZeroRows(1) nonZeroRows(2)], 'r-');
+    %plot([nonZeroCols(1) nonZeroCols(2)], [nonZeroRows(1) nonZeroRows(1)], 'r-');
+    %plot([nonZeroCols(1) nonZeroCols(2)], [nonZeroRows(2) nonZeroRows(2)], 'r-');
+
+     
+    %plot([nonZeroCols(1)], [nonZeroRows(1)], 'bx');
+     
+    dict{character}{repIdx}.firstRow = nonZeroCols(1) - min(yc);
+    dict{character}{repIdx}.img = b2(nonZeroRows(1):nonZeroRows(2),nonZeroCols(1):nonZeroCols(2)); 
+  end; 
+  nextToUse{character} = floor(rand*5)+1;
+end;
+
+
+
+
